@@ -1,22 +1,18 @@
-import sqlalchemy as sq
 from sqlalchemy.orm import declarative_base
-from sqlalchemy import create_engine, MetaData
+from sqlalchemy import create_engine, MetaData, Column, Integer
 from sqlalchemy.orm import Session
 from config import db_url_object
 
 
 Base = declarative_base()
-metadata = sq.MetaData()
-
-engine = sq.create_engine(db_url_object)
+metadata = MetaData()
+engine = create_engine(db_url_object)
 
 
 class Viewed(Base):
     __tablename__ = 'viewed'
-    profile_id = sq.Column(sq.Integer, primary_key=True)
-    user_id = sq.Column(sq.Integer, primary_key=True)
-
-    Base.metadata.create_all(engine)
+    profile_id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, primary_key=True)
 
     def add_user(engine, profile_id, user_id):
         with Session(engine) as session:
@@ -34,8 +30,8 @@ class Viewed(Base):
 
 
 if __name__ == '__main__':
-    #engine = sq.create_engine(db_url_object)
-    #Base.metadata.create_all(engine)
-    #Viewed.add_user(engine, 2113, 654623)
-    #res = Viewed.check_user(engine, 2113, 654623)
-    #print(res)
+    engine = create_engine(db_url_object)
+    Base.metadata.create_all(engine)
+    Viewed.add_user(engine, 2113, 654623)
+    res = Viewed.check_user(engine, 195050304, 294362311)
+    print(res)

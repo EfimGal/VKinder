@@ -102,7 +102,7 @@ class VkTools():
 
 
 if __name__ == '__main__':
-    #bot = VkTools(acces_token)
+    bot = VkTools(acces_token)
     #params = bot.get_profile_info(195050304)
     #pprint(params)
     #user = bot.search_users(params)[0]
