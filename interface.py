@@ -4,7 +4,7 @@ from vk_api.utils import get_random_id
 
 from config import comunity_token, acces_token
 from core import VkTools
-from data_store import Viewed
+from data_store import add_user, check_user
 from data_store import engine
 
 
@@ -17,7 +17,6 @@ class BotInterface():
         self.offset = 0
         self.params = None
         self.users = []
-        #self.viewed = Viewed
 
     def message_send(self, user_id, message, attachment=None):
         self.interface.method('messages.send',
@@ -43,35 +42,11 @@ class BotInterface():
 
                 elif command == 'поиск':
                     if self.users:
-                        while len(self.users) >= 1:
-                            user = self.users.pop()
-                            if Viewed.check_user(engine, event.user_id, user['id']):
-                                continue
-                            photos_user = self.api.get_photos(user['id'])
-                            attachment = ''
-                            for photo in photos_user:
-                                attachment += f'photo{photo["owner_id"]}_{photo["id"]},'
-                            self.message_send(event.user_id,
-                                              f'Встречайте: {user["name"]}\nСсылка: vk.com/id{user["id"]}',
-                                              attachment=attachment
-                                              )
-                            Viewed.add_user(engine, event.user_id, user['id'])
+                        self.match_generator(event)
                     else:
                         self.message_send(event.user_id, 'Начинаем поиск')
                         self.users = self.api.search_users(self.params, self.offset)
-                        while len(self.users) >= 1:
-                            user = self.users.pop()
-                            if Viewed.check_user(engine, event.user_id, user['id']):
-                                continue
-                            photos_user = self.api.get_photos(user['id'])
-                            attachment = ''
-                            for photo in photos_user:
-                                attachment += f'photo{photo["owner_id"]}_{photo["id"]},'
-                            self.message_send(event.user_id,
-                                              f'Встречайте: {user["name"]}\nСсылка: vk.com/id{user["id"]}',
-                                              attachment=attachment
-                                             )
-                            Viewed.add_user(engine, event.user_id, user['id'])
+                        self.match_generator(event)
                         self.offset += 10
 
                 elif command == 'пока':
@@ -92,6 +67,21 @@ class BotInterface():
             if event.type == VkEventType.MESSAGE_NEW and event.to_me:
                 self.message_send(user_id, 'Записали, спасибо. Для поиска анкет введите: "Поиск"')
                 return event.text
+
+    def match_generator(self, event):
+        while len(self.users) >= 1:
+            user = self.users.pop()
+            if check_user(engine, event.user_id, user['id']):
+                continue
+            photos_user = self.api.get_photos(user['id'])
+            attachment = ''
+            for photo in photos_user:
+                attachment += f'photo{photo["owner_id"]}_{photo["id"]},'
+            self.message_send(event.user_id,
+                              f'Встречайте: {user["name"]}\nСсылка: vk.com/id{user["id"]}',
+                              attachment=attachment
+                              )
+            add_user(engine, event.user_id, user['id'])
 
 
 if __name__ == '__main__':

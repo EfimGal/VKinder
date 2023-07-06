@@ -14,15 +14,17 @@ class Viewed(Base):
     profile_id = Column(Integer, primary_key=True)
     user_id = Column(Integer, primary_key=True)
 
-    def add_user(engine, profile_id, user_id):
-        with Session(engine) as session:
-            to_bd = Viewed(profile_id=profile_id, user_id=user_id)
+
+def add_user(engine, profile_id, user_id):
+    with Session(engine) as session:
+        to_bd = Viewed(profile_id=profile_id, user_id=user_id)
         session.add(to_bd)
         session.commit()
 
-    def check_user(engine, profile_id, user_id):
-        with Session(engine) as session:
-            from_bd = session.query(Viewed).filter(
+
+def check_user(engine, profile_id, user_id):
+    with Session(engine) as session:
+        from_bd = session.query(Viewed).filter(
             Viewed.profile_id == profile_id,
             Viewed.user_id == user_id
         ).first()
